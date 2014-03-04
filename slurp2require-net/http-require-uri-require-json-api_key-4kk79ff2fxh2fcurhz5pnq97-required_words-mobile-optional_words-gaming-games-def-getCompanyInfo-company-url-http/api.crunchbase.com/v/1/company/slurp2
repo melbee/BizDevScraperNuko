@@ -1,0 +1,44 @@
+require 'net/http'
+require 'uri'
+require 'json'
+
+
+@api_key = '4kk79ff2fxh2fcurhz5pnq97'
+@required_words = "mobile"
+@optional_words = "gaming games"
+def getCompanyInfo(company)
+  url = "http://api.crunchbase.com/v/1/company/#{company}.js?api_key=#{@api_key}"
+  #page_contents = Nokogiri::HTML(open(@site_url))
+  
+  page_contents = Net::HTTP.get(URI.parse(url))
+  
+  data = JSON.parse(page_contents)
+
+  output = Hash.new
+  output[:name] = data["name"]
+  output[:homepage_url] = data["homepage_url"]
+  output[:founded_year] = data["founded_year"].to_s
+  output[:category_code] = data["category_code"]
+  output[:tag_list] = data["tag_list"]
+  output[:description] = data["description"]
+  output[:overview] = data["overview"].nil? ? "" : data["overview"].gsub("\n", " ")
+  output[:raised_amount] = data["investments"][0]["funding_round"]["raised_amount"].to_s rescue ""
+  output[:raised_currency_code] = data["investments"][0]["funding_round"]["raised_currency_code"] rescue ""
+  output[:funded_year] = data["investments"][0]["funding_round"]["funded_year"] rescue ""
+
+  searchable_fields = [:category_code, :tag_list, :description, :overview]
+  searchable = ""
+  searchable_fields.each { |field| searchable << " #{output[field]}" }
+
+  required_found = true
+  optional_found = false
+
+  @required_words.split(" ").each do |word|
+    required_found = false unless searchable.include?(word)
+  end
+
+  if required_found
+    File.open('allCompanies.txt', 'a') {|f| f.write(output.values.join("|") + "\n") }
+    puts "Finished getting company #{company}"
+  end
+end
