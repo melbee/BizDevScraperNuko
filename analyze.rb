@@ -2,7 +2,6 @@
 # require 'nokogiri'
 # require 'open-uri'
 
-
 require 'json'
 
 @companies = JSON.parse( IO.read('allCompanies.json')) 
@@ -10,7 +9,3 @@ require 'json'
 @companies.each do | company |
   puts company
 end
-
-
-  
-  

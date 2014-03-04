@@ -27,12 +27,12 @@ def getCompanyInfo(company)
   output[:category_code] = data["category_code"]
   output[:tag_list] = data["tag_list"]
   output[:description] = data["description"]
-  output[:overview] = data["overview"]
+  output[:overview] = data["overview"].gsub("\n", " ")
   output[:raised_amount] = data["investments"][0]["funding_round"]["raised_amount"].to_s rescue ""
   output[:raised_currency_code] = data["investments"][0]["funding_round"]["raised_currency_code"] rescue ""
   output[:funded_year] = data["investments"][0]["funding_round"]["funded_year"] rescue ""
 
-  File.open('allCompanies.json', 'a') {|f| f.write(output.values.join("|") + "\n") }
+  File.open('allCompanies.txt', 'a') {|f| f.write(output.values.join("|") + "\n") }
   puts "Finished getting company #{company}"
   
 
