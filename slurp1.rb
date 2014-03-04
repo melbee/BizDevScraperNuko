@@ -13,19 +13,27 @@ require 'json'
 #  
 #   def site\
 
-def getCompanyInfo (company)
+def getCompanyInfo(company)
   url = "http://api.crunchbase.com/v/1/company/#{company}.js?api_key=#{@api_key}"
   #page_contents = Nokogiri::HTML(open(@site_url))
   
   page_contents = Net::HTTP.get(URI.parse(url))
   
-    begin
-      data = JSON.parse(page_contents)
-      @companies[company]['data'] = data
-    rescue
-  File.open('allCompanies.json', 'a') {|f| f.write(@companies) }  
-  puts "Finished getting company #{company}  "
-  end
+  data = JSON.parse(page_contents)
+  output = Hash.new
+  output[:name] = data["name"]
+  output[:homepage_url] = data["homepage_url"]
+  output[:founded_year] = data["founded_year"].to_s
+  output[:category_code] = data["category_code"]
+  output[:tag_list] = data["tag_list"]
+  output[:description] = data["description"]
+  output[:overview] = data["overview"]
+  output[:raised_amount] = data["investments"][0]["funding_round"]["raised_amount"].to_s rescue ""
+  output[:raised_currency_code] = data["investments"][0]["funding_round"]["raised_currency_code"] rescue ""
+  output[:funded_year] = data["investments"][0]["funding_round"]["funded_year"] rescue ""
+
+  File.open('allCompanies.json', 'a') {|f| f.write(output.values.join("|") + "\n") }
+  puts "Finished getting company #{company}"
   
 
 end
